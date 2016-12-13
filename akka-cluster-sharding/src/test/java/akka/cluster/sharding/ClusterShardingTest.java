@@ -5,6 +5,7 @@
 package akka.cluster.sharding;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
+
 import scala.concurrent.duration.Duration;
 
 import akka.actor.AbstractActor;
