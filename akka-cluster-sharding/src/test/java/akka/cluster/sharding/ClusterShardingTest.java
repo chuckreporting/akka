@@ -137,7 +137,7 @@ public class ClusterShardingTest {
     @Override
     public void preStart() throws Exception {
       super.preStart();
-      context().setReceiveTimeout(Duration.create(120, SECONDS));
+      getContext().setReceiveTimeout(Duration.create(120, SECONDS));
     }
 
     void updateState(CounterChanged event) {
