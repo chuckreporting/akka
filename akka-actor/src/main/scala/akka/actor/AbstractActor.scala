@@ -14,7 +14,18 @@ import scala.runtime.BoxedUnit
  */
 object AbstractActor {
 
+  /**
+   * Defines which messages the Actor can handle, along with the implementation of
+   * how the messages should be processed. You can build such behavior with the
+   * [[akka.japi.pf.receivebuilder]] but it can be implemented in other ways than
+   * using the `ReceiveBuilder` since it in the end is just a wrapper around a
+   * Scala `PartialFunction`.
+   */
   final class Receive(val onMessage: PartialFunction[Any, BoxedUnit]) {
+    /**
+     * Composes this `Receive` with a fallback which gets applied
+     * where this partial function is not defined.
+     */
     def orElse(other: Receive): Receive = new Receive(onMessage.orElse(other.onMessage))
   }
 
@@ -75,23 +86,23 @@ object AbstractActor {
  *   int count = 0;
  *
  *   public MyActor() {
- *     receive(ReceiveBuilder.
- *       match(Double.class, d -> {
+ *     receive(receiveBuilder()
+ *       .match(Double.class, d -> {
  *         sender().tell(d.isNaN() ? 0 : d, self());
- *       }).
- *       match(Integer.class, i -> {
+ *       })
+ *       .match(Integer.class, i -> {
  *         sender().tell(i * 10, self());
- *       }).
- *       match(String.class, s -> s.startsWith("foo"), s -> {
+ *       })
+ *       .match(String.class, s -> s.startsWith("foo"), s -> {
  *         sender().tell(s.toUpperCase(), self());
- *       }).build()
+ *       })
+ *       .build();
  *     );
  *   }
  * }
  * </pre>
  *
  */
-@ApiMayChange
 abstract class AbstractActor extends Actor {
 
   /**
@@ -103,6 +114,8 @@ abstract class AbstractActor extends Actor {
 
   /**
    * Returns the ActorRef for this actor.
+   *
+   * Same as `self()`.
    */
   def getSelf(): ActorRef = self
 
@@ -110,6 +123,11 @@ abstract class AbstractActor extends Actor {
    * The reference sender Actor of the currently processed message. This is
    * always a legal destination to send to, even if there is no logical recipient
    * for the reply, in which case it will be sent to the dead letter mailbox.
+   *
+   * Same as `sender()`.
+   *
+   * WARNING: Only valid within the Actor itself, so do not close over it and
+   * publish it to other threads!
    */
   def getSender(): ActorRef = sender()
 
@@ -132,7 +150,7 @@ abstract class AbstractActor extends Actor {
   /**
    * User overridable callback.
    * <p/>
-   * Is called asynchronously after 'actor.stop()' is invoked.
+   * Is called asynchronously after `getContext().stop()` is invoked.
    * Empty default implementation.
    */
   @throws(classOf[Exception])
@@ -155,12 +173,19 @@ abstract class AbstractActor extends Actor {
   @throws(classOf[Exception])
   override def postRestart(reason: Throwable): Unit = super.postRestart(reason)
 
+  /**
+   * An actor has to define its initial receive behavior by implementing
+   * the `initialReceive` method.
+   */
   def initialReceive(): AbstractActor.Receive
 
   override def receive: PartialFunction[Any, Unit] =
     initialReceive().onMessage.asInstanceOf[PartialFunction[Any, Unit]]
 
-  // FIXME move to companion?
+  /**
+   * Convenience factory of the `ReceiveBuilder`.
+   * Creates a new empty `ReceiveBuilder`.
+   */
   final def receiveBuilder(): ReceiveBuilder = ReceiveBuilder.create()
 }
 

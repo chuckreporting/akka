@@ -12,7 +12,6 @@ import scala.concurrent.duration.FiniteDuration
  * Java API: compatible with lambda expressions
  *
  */
-@ApiMayChange
 object AbstractFSM {
   /**
    * A partial function value which does not match anything and can be used to
