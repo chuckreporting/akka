@@ -1,4 +1,4 @@
-.. _persistence-lambda:
+.. _persistence-java:
 
 ###########
 Persistence
@@ -63,11 +63,11 @@ Architecture
   Replicated snapshot stores are available as `Community plugins`_.
 
 * *Event sourcing*. Based on the building blocks described above, Akka persistence provides abstractions for the
-  development of event sourced applications (see section :ref:`event-sourcing-lambda`)
+  development of event sourced applications (see section :ref:`event-sourcing-java`)
 
 .. _Community plugins: http://akka.io/community/
 
-.. _event-sourcing-lambda:
+.. _event-sourcing-java:
 
 Event sourcing
 ==============
@@ -108,7 +108,7 @@ about successful state changes by publishing events.
 
 When persisting events with ``persist`` it is guaranteed that the persistent actor will not receive further commands between
 the ``persist`` call and the execution(s) of the associated event handler. This also holds for multiple ``persist``
-calls in context of a single command. Incoming messages are :ref:`stashed <internal-stash-lambda>` until the ``persist``
+calls in context of a single command. Incoming messages are :ref:`stashed <internal-stash-java>` until the ``persist``
 is completed.
 
 If persistence of an event fails, ``onPersistFailure`` will be invoked (logging the error by default),
@@ -143,7 +143,7 @@ The identifier must be defined with the ``persistenceId`` method.
   So, if two different entities share the same ``persistenceId``, message-replaying
   behavior is corrupted.
 
-.. _recovery-lambda:
+.. _recovery-java:
 
 Recovery
 --------
@@ -157,7 +157,7 @@ only be received by a persistent actor after recovery completes.
   as the original sender is presumed to be long gone. If you indeed have to notify an actor during
   recovery in the future, store its ``ActorPath`` explicitly in your persisted events.
 
-.. _recovery-custom-lambda:
+.. _recovery-custom-java:
 
 Recovery customization
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -200,13 +200,13 @@ and before any other received messages.
 If there is a problem with recovering the state of the actor from the journal, ``onRecoveryFailure``
 is called (logging the error by default), and the actor will be stopped.
 
-.. _internal-stash-lambda:
+.. _internal-stash-java:
 
 Internal stash 
 --------------
 
-The persistent actor has a private :ref:`stash <stash-lambda>` for internally caching incoming messages during 
-:ref:`recovery <recovery-lambda>` or the ``persist\persistAll`` method persisting events. You can still 
+The persistent actor has a private :ref:`stash <stash-java>` for internally caching incoming messages during 
+:ref:`recovery <recovery-java>` or the ``persist\persistAll`` method persisting events. You can still 
 use/inherit from the ``Stash`` interface. The internal stash cooperates with the normal stash by hooking into 
 ``unstashAll`` method and making sure messages are unstashed properly to the internal stash to maintain ordering 
 guarantees.
@@ -268,7 +268,7 @@ The ordering between events is still guaranteed ("evt-b-1" will be sent after "e
   The callback will not be invoked if the actor is restarted (or stopped) in between the call to
   ``persistAsync`` and the journal has confirmed the write.
 
-.. _defer-lambda:
+.. _defer-java:
 
 Deferring actions until preceding persist handlers have executed
 ----------------------------------------------------------------
@@ -292,7 +292,7 @@ of the command for which this ``deferAsync`` handler was called.
   The callback will not be invoked if the actor is restarted (or stopped) in between the call to
   ``deferAsync`` and the journal has processed and confirmed all preceding writes.
 
-.. _nested-persist-calls-lambda:
+.. _nested-persist-calls-java:
 
 Nested persist calls
 --------------------
@@ -334,7 +334,7 @@ it is not a recommended practice, as it may lead to overly complex nesting.
   that the persist methods aim to provide. Always call ``persist`` and ``persistAsync`` from within 
   the Actor's receive block (or methods synchronously invoked from there).
 
-.. _failures-lambda:
+.. _failures-java:
 
 Failures
 --------
@@ -357,7 +357,7 @@ next message.
 If there is a problem with recovering the state of the actor from the journal when the actor is
 started, ``onRecoveryFailure`` is called (logging the error by default), and the actor will be stopped.
 Note that failure to load snapshot is also treated like this, but you can disable loading of snapshots
-if you for example know that serialization format has changed in an incompatible way, see :ref:`recovery-custom-lambda`.
+if you for example know that serialization format has changed in an incompatible way, see :ref:`recovery-custom-java`.
 
 Atomic writes
 -------------
@@ -430,7 +430,7 @@ For critical failures, such as recovery or persisting events failing, the persis
 handler is invoked. This is because if the underlying journal implementation is signalling persistence failures it is most
 likely either failing completely or overloaded and restarting right-away and trying to persist the event again will most
 likely not help the journal recover – as it would likely cause a `Thundering herd problem`_, as many persistent actors
-would restart and try to persist their events again. Instead, using a ``BackoffSupervisor`` (as described in :ref:`failures-lambda`) which
+would restart and try to persist their events again. Instead, using a ``BackoffSupervisor`` (as described in :ref:`failures-java`) which
 implements an exponential-backoff strategy which allows for more breathing room for the journal to recover between
 restarts of the persistent actor.
 
@@ -443,13 +443,13 @@ restarts of the persistent actor.
 
 .. _Thundering herd problem: https://en.wikipedia.org/wiki/Thundering_herd_problem
 
-.. _safe-shutdown-lambda:
+.. _safe-shutdown-java:
 
 Safely shutting down persistent actors
 --------------------------------------
 
 Special care should be given when when shutting down persistent actors from the outside.
-With normal Actors it is often acceptable to use the special :ref:`PoisonPill <poison-pill-lambda>` message
+With normal Actors it is often acceptable to use the special :ref:`PoisonPill <poison-pill-java>` message
 to signal to an Actor that it should stop itself once it receives this message – in fact this message is handled
 automatically by Akka, leaving the target actor no way to refuse stopping itself when given a poison pill.
 
@@ -561,7 +561,7 @@ status messages as illustrated in the following table.
 ``deleteSnapshots(SnapshotSelectionCriteria)`` ``DeleteSnapshotsSuccess`` ``DeleteSnapshotsFailure``
 ============================================== ========================== ==============================
 
-.. _at-least-once-delivery-lambda:
+.. _at-least-once-delivery-java:
 
 At-Least-Once Delivery
 ======================
@@ -668,7 +668,7 @@ not accept more messages and it will throw ``AtLeastOnceDelivery.MaxUnconfirmedM
 The default value can be configured with the ``akka.persistence.at-least-once-delivery.max-unconfirmed-messages``
 configuration key. The method can be overridden by implementation classes to return non-default values.
 
-.. _event-adapters-lambda:
+.. _event-adapters-java:
 
 Event Adapters
 ==============
@@ -708,7 +708,7 @@ adaptation simply return ``EventSeq.empty``. The adapted events are then deliver
 .. note::
   For more advanced schema evolution techniques refer to the :ref:`persistence-schema-evolution-scala` documentation.
 
-.. _persistent-fsm-lambda:
+.. _persistent-fsm-java:
 
 Persistent FSM
 ==============
@@ -799,8 +799,8 @@ persistence extension will use "default" journal and snapshot-store plugins conf
     akka.persistence.snapshot-store.plugin = ""
 
 However, these entries are provided as empty "", and require explicit user configuration via override in the user ``application.conf``.
-For an example of journal plugin which writes messages to LevelDB see :ref:`local-leveldb-journal-lambda`.
-For an example of snapshot store plugin which writes snapshots as individual files to the local filesystem see :ref:`local-snapshot-store-lambda`.
+For an example of journal plugin which writes messages to LevelDB see :ref:`local-leveldb-journal-java`.
+For an example of snapshot store plugin which writes snapshots as individual files to the local filesystem see :ref:`local-snapshot-store-java`.
 
 Applications can provide their own plugins by implementing a plugin API and activate them by configuration.
 Plugin development requires the following imports:
@@ -815,7 +815,7 @@ to start a certain plugin eagerly. In order to do that, you should first add the
 under the ``akka.extensions`` key. Then, specify the IDs of plugins you wish to start automatically under
 ``akka.persistence.journal.auto-start-journals`` and ``akka.persistence.snapshot-store.auto-start-snapshot-stores``.
 
-.. _journal-plugin-api-lambda:
+.. _journal-plugin-api-java:
 
 Journal plugin API
 ------------------
@@ -926,7 +926,7 @@ might have otherwise forgotten to test for when writing a plugin from scratch.
 Pre-packaged plugins
 ====================
 
-.. _local-leveldb-journal-lambda:
+.. _local-leveldb-journal-java:
 
 Local LevelDB journal
 ---------------------
@@ -956,7 +956,7 @@ directory. This location can be changed by configuration where the specified pat
 
 With this plugin, each actor system runs its own private LevelDB instance.
 
-.. _shared-leveldb-journal-lambda:
+.. _shared-leveldb-journal-java:
 
 Shared LevelDB journal
 ----------------------
@@ -972,7 +972,7 @@ backup node.
 
 .. note::
 
-  This plugin has been supplanted by :ref:`Persistence Plugin Proxy<persistence-plugin-proxy-lambda>`.
+  This plugin has been supplanted by :ref:`Persistence Plugin Proxy<persistence-plugin-proxy-java>`.
 
 A shared LevelDB instance is started by instantiating the ``SharedLeveldbStore`` actor.
 
@@ -996,7 +996,7 @@ done by calling the ``SharedLeveldbJournal.setStore`` method with the actor refe
 Internal journal commands (sent by persistent actors) are buffered until injection completes. Injection is idempotent
 i.e. only the first injection is used.
 
-.. _local-snapshot-store-lambda:
+.. _local-snapshot-store-java:
 
 Local snapshot store
 --------------------
@@ -1014,7 +1014,7 @@ directory. This can be changed by configuration where the specified path can be 
 Note that it is not mandatory to specify a snapshot store plugin. If you don't use snapshots
 you don't have to configure it.
 
-.. _persistence-plugin-proxy-lambda:
+.. _persistence-plugin-proxy-java:
 
 Persistence Plugin Proxy
 ------------------------
@@ -1049,7 +1049,7 @@ and ``target-snapshot-store-address`` configuration keys, or programmatically by
   The proxied persistence plugin can (and should) be configured using its original configuration keys.
 
 
-.. _custom-serialization-lambda:
+.. _custom-serialization-java:
 
 Custom serialization
 ====================
@@ -1082,8 +1082,8 @@ or
 in your Akka configuration. The LevelDB Java port is for testing purposes only.
 
 .. warning::
-  It is not possible to test persistence provided classes (i.e. :ref:`PersistentActor <event-sourcing-lambda>`
-  and :ref:`AtLeastOnceDelivery <at-least-once-delivery-lambda>`) using ``TestActorRef`` due to its *synchronous* nature.
+  It is not possible to test persistence provided classes (i.e. :ref:`PersistentActor <event-sourcing-java>`
+  and :ref:`AtLeastOnceDelivery <at-least-once-delivery-java>`) using ``TestActorRef`` due to its *synchronous* nature.
   These traits need to be able to perform asynchronous tasks in the background in order to handle internal persistence
   related events.
 

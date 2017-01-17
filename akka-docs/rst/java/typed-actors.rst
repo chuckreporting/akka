@@ -186,7 +186,7 @@ Supervisor Strategy
 
 By having your Typed Actor implementation class implement ``TypedActor.Supervisor``
 you can define the strategy to use for supervising child actors, as described in
-:ref:`supervision` and :ref:`fault-tolerance-lambda`.
+:ref:`supervision` and :ref:`fault-tolerance-java`.
 
 Receive arbitrary messages
 --------------------------

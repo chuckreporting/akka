@@ -1,4 +1,4 @@
-.. _fault-tolerance-lambda:
+.. _fault-tolerance-java:
 
 Fault Tolerance
 ===============

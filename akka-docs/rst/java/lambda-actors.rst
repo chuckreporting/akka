@@ -1,4 +1,4 @@
-.. _actors-lambda:
+.. _actors-java:
 
 ########
  Actors 
@@ -166,7 +166,7 @@ another child to the same parent an `InvalidActorNameException` is thrown.
 
 Actors are automatically started asynchronously when created.
 
-.. _actor-create-factory-lambda:
+.. _actor-create-factory-java:
 
 Dependency Injection
 --------------------
@@ -253,7 +253,7 @@ In addition, it offers:
   * parent supervisor
   * supervised children
   * lifecycle monitoring
-  * hotswap behavior stack as described in :ref:`actor-hotswap-lambda`
+  * hotswap behavior stack as described in :ref:`actor-hotswap-java`
 
 The remaining visible methods are user-overridable life-cycle hooks which are
 described in the following:
@@ -303,11 +303,11 @@ occupying it. ``ActorSelection`` cannot be watched for this reason. It is
 possible to resolve the current incarnation's ``ActorRef`` living under the
 path by sending an ``Identify`` message to the ``ActorSelection`` which
 will be replied to with an ``ActorIdentity`` containing the correct reference
-(see :ref:`actorselection-lambda`). This can also be done with the ``resolveOne``
+(see :ref:`actorselection-java`). This can also be done with the ``resolveOne``
 method of the :class:`ActorSelection`, which returns a ``Future`` of the matching
 :class:`ActorRef`.
 
-.. _deathwatch-lambda:
+.. _deathwatch-java:
 
 Lifecycle Monitoring aka DeathWatch
 -----------------------------------
@@ -341,7 +341,7 @@ using ``context.unwatch(target)``. This works even if the :class:`Terminated`
 message has already been enqueued in the mailbox; after calling :meth:`unwatch`
 no :class:`Terminated` message for that actor will be processed anymore.
 
-.. _start-hook-lambda:
+.. _start-hook-java:
 
 Start Hook
 ----------
@@ -358,7 +358,7 @@ Initialization code which is part of the actor’s constructor will always be
 called when an instance of the actor class is created, which happens at every
 restart.
 
-.. _restart-hook-lambda:
+.. _restart-hook-java:
 
 Restart Hooks
 -------------
@@ -401,7 +401,7 @@ usual.
   it has processed the last messages sent by the child before the failure.
   See :ref:`message-ordering` for details.
 
-.. _stop-hook-lambda:
+.. _stop-hook-java:
 
 Stop Hook
 ---------
@@ -412,7 +412,7 @@ to run after message queuing has been disabled for this actor, i.e. messages
 sent to a stopped actor will be redirected to the :obj:`deadLetters` of the
 :obj:`ActorSystem`.
 
-.. _actorselection-lambda:
+.. _actorselection-java:
 
 Identifying Actors via Actor Selection
 ======================================
@@ -434,7 +434,7 @@ result:
   It is always preferable to communicate with other Actors using their ActorRef
   instead of relying upon ActorSelection. Exceptions are
 
-    * sending messages using the :ref:`at-least-once-delivery-lambda` facility
+    * sending messages using the :ref:`at-least-once-delivery-java` facility
     * initiating first contact with a remote system
 
   In all other cases ActorRefs can be provided during Actor creation or
@@ -519,7 +519,7 @@ In all these methods you have the option of passing along your own ``ActorRef``.
 Make it a practice of doing so because it will allow the receiver actors to be able to respond
 to your message, since the sender reference is sent along with the message.
 
-.. _actors-tell-sender-lambda:
+.. _actors-tell-sender-java:
 
 Tell: Fire-forget
 -----------------
@@ -538,7 +538,7 @@ different one. Outside of an actor and if no reply is needed the second
 argument can be ``null``; if a reply is needed outside of an actor you can use
 the ask-pattern described next..
 
-.. _actors-ask-lambda:
+.. _actors-ask-java:
 
 Ask: Send-And-Receive-Future
 ----------------------------
@@ -693,7 +693,7 @@ Messages marked with ``NotInfluenceReceiveTimeout`` will not reset the timer. Th
 ``ReceiveTimeout`` should be fired by external inactivity but not influenced by internal activity,
 e.g. scheduled tick messages.
 
-.. _stopping-actors-lambda:
+.. _stopping-actors-java:
 
 Stopping actors
 ===============
@@ -715,7 +715,7 @@ Termination of an actor proceeds in two steps: first the actor suspends its
 mailbox processing and sends a stop command to all its children, then it keeps
 processing the internal termination notifications from its children until the last one is
 gone, finally terminating itself (invoking :meth:`postStop`, dumping mailbox,
-publishing :class:`Terminated` on the :ref:`DeathWatch <deathwatch-lambda>`, telling
+publishing :class:`Terminated` on the :ref:`DeathWatch <deathwatch-java>`, telling
 its supervisor). This procedure ensures that actor system sub-trees terminate
 in an orderly fashion, propagating the stop command to the leaves and
 collecting their confirmation back to the stopped supervisor. If one of the
@@ -741,7 +741,7 @@ enables cleaning up of resources:
   actor and create its replacement in response to the :class:`Terminated`
   message which will eventually arrive.
 
-.. _poison-pill-lambda:
+.. _poison-pill-java:
 
 PoisonPill
 ----------
@@ -783,7 +783,7 @@ before stopping the target actor. Simple cleanup tasks can be handled in ``postS
   within a supervisor you control and only in response to a :class:`Terminated`
   message, i.e. not for top-level actors.
 
-.. _coordinated-shutdown-lambda:  
+.. _coordinated-shutdown-java:  
   
 Coordinated Shutdown
 --------------------
@@ -853,7 +853,7 @@ those shutting down Akka Remoting (Artery).
 .. includecode:: code/docs/actorlambda/ActorDocTest.java#coordinated-shutdown-jvm-hook
 
 
-.. _actor-hotswap-lambda:
+.. _actor-hotswap-java:
 
 Become/Unbecome
 ===============
@@ -888,7 +888,7 @@ behavior is not the default).
 
 .. includecode:: code/docs/actorlambda/ActorDocTest.java#swapper
 
-.. _stash-lambda:
+.. _stash-java:
 
 Stash
 =====
@@ -948,7 +948,7 @@ usually the desired behavior.
   then you should use the ``AbstractActorWithUnboundedStash`` class instead.
 
 
-.. _killing-actors-lambda:
+.. _killing-actors-java:
 
 Killing an Actor
 ================

@@ -102,7 +102,7 @@ read the documentation for the Coordinated Shutdown and revisit your own impleme
 Most likely your implementation will not be needed any more or it can be simplified.
 
 More information can be found in the :ref:`documentation for Scala <coordinated-shutdown-scala>` or
-:ref:`documentation for Java <coordinated-shutdown-lambda>`  
+:ref:`documentation for Java <coordinated-shutdown-java>`  
 
 Cluster Management Command Line Tool
 ------------------------------------
