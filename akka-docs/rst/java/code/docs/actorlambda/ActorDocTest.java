@@ -12,14 +12,13 @@ import akka.testkit.TestEvent;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import docs.AbstractJavaTest;
-import docs.actor.ActorDocTest.FirstActor;
 import scala.PartialFunction;
 import scala.runtime.BoxedUnit;
 import static docs.actorlambda.Messages.Swap.Swap;
 import static docs.actorlambda.Messages.*;
 import static akka.japi.Util.immutableSeq;
 import akka.actor.CoordinatedShutdown;
-import static akka.pattern.PatternsCS.ask;
+
 import akka.util.Timeout;
 import akka.Done;
 import java.util.concurrent.CompletionStage;
@@ -832,7 +831,7 @@ public class ActorDocTest extends AbstractJavaTest {
     CoordinatedShutdown.get(system).addTask(
       CoordinatedShutdown.PhaseBeforeServiceUnbind(), "someTaskName",
       () -> {
-        return ask(someActor, "stop", new Timeout(5, TimeUnit.SECONDS))
+        return akka.pattern.PatternsCS.ask(someActor, "stop", new Timeout(5, TimeUnit.SECONDS))
           .thenApply(reply -> Done.getInstance());
     });
     //#coordinated-shutdown-addTask

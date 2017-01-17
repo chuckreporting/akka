@@ -9,7 +9,7 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 import akka.actor.ActorRef;
-import akka.actor.UntypedActor;
+import akka.actor.AbstractActor;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
 import akka.io.Tcp.ConnectionClosed;
@@ -20,7 +20,7 @@ import akka.japi.Procedure;
 import akka.util.ByteString;
 
 //#simple-echo-handler
-public class SimpleEchoHandler extends UntypedActor {
+public class SimpleEchoHandler extends AbstractActor {
   
   final LoggingAdapter log = Logging
       .getLogger(getContext().system(), self());
@@ -41,38 +41,42 @@ public class SimpleEchoHandler extends UntypedActor {
   }
 
   @Override
-  public void onReceive(Object msg) throws Exception {
-    if (msg instanceof Received) {
-      final ByteString data = ((Received) msg).data();
-      buffer(data);
-      connection.tell(TcpMessage.write(data, ACK), self());
-      // now switch behavior to “waiting for acknowledgement”
-      getContext().become(buffering, false);
-
-    } else if (msg instanceof ConnectionClosed) {
-      getContext().stop(self());
-    }
+  public Receive initialReceive() {
+    return receiveBuilder()
+      .match(Received.class, msg -> {
+        final ByteString data = msg.data();
+        buffer(data);
+        connection.tell(TcpMessage.write(data, ACK), self());
+        // now switch behavior to “waiting for acknowledgement”
+        getContext().become(buffering(), false);
+  
+      })
+      .match(ConnectionClosed.class, msg -> {
+        getContext().stop(self());
+      })
+      .build();
   }
 
-  private final Procedure<Object> buffering = new Procedure<Object>() {
-    @Override
-    public void apply(Object msg) throws Exception {
-      if (msg instanceof Received) {
-        buffer(((Received) msg).data());
+  private final Receive buffering() {
+    return receiveBuilder()
+      .match(Received.class, msg -> {
+        buffer(msg.data());
         
-      } else if (msg == ACK) {
+      })
+      .match(Event.class, msg -> msg == ACK, msg -> {
         acknowledge();
 
-      } else if (msg instanceof ConnectionClosed) {
-        if (((ConnectionClosed) msg).isPeerClosed()) {
+      })
+      .match(ConnectionClosed.class, msg -> {
+        if (msg.isPeerClosed()) {
           closing = true;
         } else {
           // could also be ErrorClosed, in which case we just give up
           getContext().stop(self());
         }
-      }
-    }
-  };
+      })
+      .build();
+  }
 
   //#storage-omitted
   public void postStop() {

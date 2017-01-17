@@ -9,7 +9,7 @@ import java.net.InetSocketAddress;
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.actor.SupervisorStrategy;
-import akka.actor.UntypedActor;
+import akka.actor.AbstractActor;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
 import akka.io.Tcp;
@@ -19,7 +19,7 @@ import akka.io.Tcp.CommandFailed;
 import akka.io.Tcp.Connected;
 import akka.io.TcpMessage;
 
-public class EchoManager extends UntypedActor {
+public class EchoManager extends AbstractActor {
 
   final LoggingAdapter log = Logging
       .getLogger(getContext().system(), self());
@@ -52,30 +52,31 @@ public class EchoManager extends UntypedActor {
   }
 
   @Override
-  public void onReceive(Object msg) throws Exception {
-    if (msg instanceof Bound) {
-      log.info("listening on [{}]", ((Bound) msg).localAddress());
-    } else if (msg instanceof Tcp.CommandFailed) {
-      final CommandFailed failed = (CommandFailed) msg;
-      if (failed.cmd() instanceof Bind) {
-        log.warning("cannot bind to [{}]", ((Bind) failed.cmd()).localAddress());
-        getContext().stop(self());
-      } else {
-        log.warning("unknown command failed [{}]", failed.cmd());
-      }
-    } else
-    if (msg instanceof Connected) {
-      final Connected conn = (Connected) msg;
-      log.info("received connection from [{}]", conn.remoteAddress());
-      final ActorRef connection = sender();
-      final ActorRef handler = getContext().actorOf(
-          Props.create(handlerClass, connection, conn.remoteAddress()));
-      //#echo-manager
-      connection.tell(TcpMessage.register(handler,
-          true, // <-- keepOpenOnPeerClosed flag
-          true), self());
-      //#echo-manager
-    }
+  public Receive initialReceive() {
+    return receiveBuilder()
+      .match(Bound.class, msg -> {
+        log.info("listening on [{}]", msg.localAddress());
+      })
+      .match(Tcp.CommandFailed.class, failed -> {
+        if (failed.cmd() instanceof Bind) {
+          log.warning("cannot bind to [{}]", ((Bind) failed.cmd()).localAddress());
+          getContext().stop(self());
+        } else {
+          log.warning("unknown command failed [{}]", failed.cmd());
+        }
+      })
+      .match(Connected.class, conn -> {
+        log.info("received connection from [{}]", conn.remoteAddress());
+        final ActorRef connection = sender();
+        final ActorRef handler = getContext().actorOf(
+            Props.create(handlerClass, connection, conn.remoteAddress()));
+        //#echo-manager
+        connection.tell(TcpMessage.register(handler,
+            true, // <-- keepOpenOnPeerClosed flag
+            true), self());
+        //#echo-manager
+      })
+      .build();
   }
 
 }
