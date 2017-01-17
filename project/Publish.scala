@@ -45,12 +45,22 @@ object Publish extends AutoPlugin {
     sonatypeRepo(version.value) orElse localRepo(defaultPublishTo.value)
   }
 
-  private def sonatypeRepo(version: String): Option[Resolver] =
-    Option(sys.props("publish.maven.central")) filter (_.toLowerCase == "true") map { _ =>
+  private def sonatypeRepo(version: String): Option[Resolver] = {
+    val nexus = "http://nexus.aws.aspect.com:8081/nexus/"
+    if (version endsWith "-SNAPSHOT") {
+      Some("snapshots" at nexus + "content/repositories/snapshots")
+    }
+
+    else {
+      Some("releases" at nexus + "content/repositories/releases")
+    }
+  }
+
+  /*    Option(sys.props("publish.maven.central")) filter (_.toLowerCase == "true") map { _ =>
       val nexus = "https://oss.sonatype.org/"
       if (version endsWith "-SNAPSHOT") "snapshots" at nexus + "content/repositories/snapshots"
       else "releases" at nexus + "service/local/staging/deploy/maven2"
-    }
+    }*/
 
   private def localRepo(repository: File) =
     Some(Resolver.file("Default Local Repository", repository))
