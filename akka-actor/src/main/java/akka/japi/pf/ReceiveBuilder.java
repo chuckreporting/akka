@@ -81,8 +81,24 @@ public class ReceiveBuilder {
    *          an action to apply to the argument if the type matches
    * @return a builder with the case statement added
    */
+  public <P> ReceiveBuilder match(final Class<P> type, final FI.UnitApply<P> apply) {
+    return matchUnchecked(type, apply);
+  }
+
+  /**
+   * Add a new case statement to this builder without compile time type check.
+   * Should normally not be used, but when matching on class with generic type
+   * argument it can be useful, e.g. <code>List.class</code> and
+   * <code>(List&lt;String&gt; list) -> {}</code>.
+   *
+   * @param type
+   *          a type to match the argument against
+   * @param apply
+   *          an action to apply to the argument if the type matches
+   * @return a builder with the case statement added
+   */
   @SuppressWarnings("unchecked")
-  public <P> ReceiveBuilder match(final Class<? extends P> type, final FI.UnitApply<? extends P> apply) {
+  public ReceiveBuilder matchUnchecked(final Class<?> type, final FI.UnitApply<?> apply) {
 
     FI.Predicate predicate = new FI.Predicate() {
       @Override
@@ -91,7 +107,7 @@ public class ReceiveBuilder {
       }
     };
 
-    addStatement(new UnitCaseStatement<Object, P>(predicate, (FI.UnitApply<P>) apply));
+    addStatement(new UnitCaseStatement<Object, Object>(predicate, (FI.UnitApply<Object>) apply));
 
     return this;
   }
@@ -109,23 +125,41 @@ public class ReceiveBuilder {
    *          predicate returns true
    * @return a builder with the case statement added
    */
-  @SuppressWarnings("unchecked")
-  public <P> ReceiveBuilder match(final Class<? extends P> type, final FI.TypedPredicate<? extends P> predicate,
-      final FI.UnitApply<? extends P> apply) {
-    FI.Predicate fiPredicate = new FI.Predicate() {
+  public <P> ReceiveBuilder match(final Class<P> type, final FI.TypedPredicate<P> predicate,
+      final FI.UnitApply<P> apply) {
+    return matchUnchecked(type, predicate, apply);
+  }
+
+    /**
+     * Add a new case statement to this builder without compile time type check.
+     * Should normally not be used, but when matching on class with generic type
+     * argument it can be useful, e.g. <code>List.class</code> and
+     * <code>(List&lt;String&gt; list) -> {}</code>.
+     *
+     * @param type
+     *          a type to match the argument against
+     * @param predicate
+     *          a predicate that will be evaluated on the argument if the type
+     *          matches
+     * @param apply
+     *          an action to apply to the argument if the type matches and the
+     *          predicate returns true
+     * @return a builder with the case statement added
+     */
+    @SuppressWarnings("unchecked")
+    public <P> ReceiveBuilder matchUnchecked(final Class<?> type, final FI.TypedPredicate<?> predicate,
+        final FI.UnitApply<P> apply) {
+      FI.Predicate fiPredicate = new FI.Predicate() {
       @Override
       public boolean defined(Object o) {
         if (!type.isInstance(o))
           return false;
-        else {
-          @SuppressWarnings("unchecked")
-          P p = (P) o;
-          return ((FI.TypedPredicate<P>) predicate).defined(p);
-        }
+        else
+          return ((FI.TypedPredicate<Object>) predicate).defined(o);
       }
     };
 
-    addStatement(new UnitCaseStatement<Object, P>(fiPredicate, (FI.UnitApply<P>) apply));
+    addStatement(new UnitCaseStatement<Object, Object>(fiPredicate, (FI.UnitApply<Object>) apply));
 
     return this;
   }

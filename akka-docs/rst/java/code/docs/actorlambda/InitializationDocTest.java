@@ -97,7 +97,7 @@ public class InitializationDocTest extends AbstractJavaTest {
     @Override
     public Receive initialReceive() {
       return receiveBuilder()
-        .match(GenericMessage.class, (GenericMessage<String> msg) -> {
+        .matchUnchecked(GenericMessage.class, (GenericMessage<String> msg) -> {
           GenericMessage<String> message = msg;
           sender().tell(message.value.toUpperCase(), self());
         })
@@ -111,7 +111,7 @@ public class InitializationDocTest extends AbstractJavaTest {
       FI.TypedPredicate<GenericMessage<String>> typedPredicate = s -> !s.value.isEmpty();
 
       return receiveBuilder()
-        .match(GenericMessage.class, typedPredicate, (GenericMessage<String> msg) -> {
+        .matchUnchecked(GenericMessage.class, typedPredicate, (GenericMessage<String> msg) -> {
           sender().tell(msg.value.toUpperCase(), self());
         })
         .build();

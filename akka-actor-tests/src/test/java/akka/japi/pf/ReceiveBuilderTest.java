@@ -4,6 +4,8 @@
 
 package akka.japi.pf;
 
+import java.util.Arrays;
+import java.util.List;
 import org.junit.Test;
 import org.junit.Before;
 import org.scalatest.junit.JUnitSuite;
@@ -179,5 +181,30 @@ public class ReceiveBuilderTest extends JUnitSuite {
 
     assertTrue(rcv.onMessage().isDefinedAt("hello"));
     assertTrue(rcv.onMessage().isDefinedAt(42));
+  }
+
+  @Test
+  public void shouldMatchUnchecked() {
+    Receive rcv = ReceiveBuilder.create()
+        .matchUnchecked(List.class, (List<String> list) -> {
+          result("match List");
+        })
+        .build();
+    List<String> list = Arrays.asList("foo");
+    assertTrue(rcv.onMessage().isDefinedAt(list));
+    rcv.onMessage().apply(list);
+    assertEquals("match List", result());
+  }
+
+  @Test(expected = ClassCastException.class)
+  public void shouldThrowWhenUncheckedWithWrongTypes() {
+    // note that this doesn't compile with ordinary match
+    Receive rcv = ReceiveBuilder.create()
+      .matchUnchecked(String.class, (Integer i) -> {
+        result(String.valueOf(i + 2));
+      })
+      .build();
+    assertTrue(rcv.onMessage().isDefinedAt("foo"));
+    rcv.onMessage().apply("foo");
   }
 }
