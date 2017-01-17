@@ -107,7 +107,7 @@ public class ActorDocTest extends AbstractJavaTest {
   }
   //#context-actorOf
 
-  static public abstract class SomeActor extends AbstractActor {
+  static public class SomeActor extends AbstractActor {
     //#initialReceive
     @Override
     public Receive initialReceive() {

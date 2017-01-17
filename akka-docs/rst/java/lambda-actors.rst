@@ -606,6 +606,8 @@ routers, load-balancers, replicators etc.
 
 .. includecode:: code/docs/actorlambda/ActorDocTest.java#forward
 
+.. _actors-receive-java:
+
 Receive messages
 ================
 
