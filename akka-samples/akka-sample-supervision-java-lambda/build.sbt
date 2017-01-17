@@ -1,6 +1,6 @@
 name := "akka-sample-supervision-java-lambda"
 
-version := "2.4.16"
+version := "2.4.16-aspect"
 
 scalaVersion := "2.11.8"
 
@@ -11,8 +11,8 @@ javacOptions in doc ++= Seq("-encoding", "UTF-8", "-source", "1.8", "-Xdoclint:n
 testOptions += Tests.Argument(TestFrameworks.JUnit, "-v", "-a")
 
 libraryDependencies ++= Seq(
-  "com.typesafe.akka" %%      "akka-actor" % "2.4.16",
-  "com.typesafe.akka" %%    "akka-testkit" % "2.4.16" % "test",
+  "com.typesafe.akka" %%      "akka-actor" % "2.4.16-aspect",
+  "com.typesafe.akka" %%    "akka-testkit" % "2.4.16-aspect" % "test",
               "junit"  %           "junit" % "4.12"         % "test",
        "com.novocode"  % "junit-interface" % "0.11"         % "test")
 
