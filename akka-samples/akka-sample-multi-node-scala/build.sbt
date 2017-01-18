@@ -10,7 +10,7 @@ val project = Project(
   .settings(SbtMultiJvm.multiJvmSettings: _*)
   .settings(
     name := "akka-sample-multi-node-scala",
-    version := "2.4.16-aspect",
+    version := "2.4.16-aspect-SNAPSHOT",
     scalaVersion := "2.11.8",
     libraryDependencies ++= Seq(
       "com.typesafe.akka" %% "akka-actor" % akkaVersion,

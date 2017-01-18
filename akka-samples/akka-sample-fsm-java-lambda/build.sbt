@@ -1,6 +1,6 @@
 name := "akka-sample-fsm-java-lambda"
 
-version := "2.4.16-aspect"
+version := "2.4.16-aspect-SNAPSHOT"
 
 scalaVersion := "2.11.8"
 
