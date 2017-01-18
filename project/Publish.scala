@@ -46,7 +46,7 @@ object Publish extends AutoPlugin {
   }
 
   private def sonatypeRepo(version: String): Option[Resolver] = {
-    val nexus = "http://nexus.aws.aspect.com:8081/nexus/"
+    val nexus = sysPropOrDefault("nexusurl","thatone") //"http://nexus.aws.aspect.com:8081/nexus/"
     if (version endsWith "-SNAPSHOT") {
       Some("snapshots" at nexus + "content/repositories/snapshots")
     }
@@ -65,7 +65,14 @@ object Publish extends AutoPlugin {
   private def localRepo(repository: File) =
     Some(Resolver.file("Default Local Repository", repository))
 
-  private def akkaCredentials: Seq[Credentials] =
-    Option(System.getProperty("akka.publish.credentials", null)).map(f => Credentials(new File(f))).toSeq
+  def sysPropOrDefault(propName:String,default:String):String = Option(System.getProperty(propName)).getOrElse(default)
+
+  private def akkaCredentials: Seq[Credentials] = {
+    val project = sysPropOrDefault("project","thatone")
+    val username = sysPropOrDefault("username","change_me")
+    val password = sysPropOrDefault("password","chuckNorris")
+    Seq(Credentials("Sonatype Nexus Repository Manager", project,username, password))
+   // Option(System.getProperty("akka.publish.credentials", null)).map(f => Credentials(new File(f))).toSeq
+  }
 
 }
