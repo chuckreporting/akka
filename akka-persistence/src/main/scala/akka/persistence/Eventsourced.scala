@@ -4,6 +4,7 @@
 
 package akka.persistence
 
+import java.time.Instant
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.UUID
 
@@ -262,6 +263,7 @@ private[persistence] trait Eventsourced extends Snapshotter with PersistenceStas
 
   private def flushJournalBatch(): Unit =
     if (!writeInProgress && journalBatch.nonEmpty) {
+      startWrite = Some(Instant.now().toEpochMilli)
       journal ! WriteMessages(journalBatch, self, instanceId)
       journalBatch = Vector.empty
       writeInProgress = true
@@ -594,6 +596,10 @@ private[persistence] trait Eventsourced extends Snapshotter with PersistenceStas
     try pendingInvocations.peek().handler(payload)
     finally flushBatch()
 
+  var startWrite : Option [Long] = None
+
+  var writeAlarmThreshold = 200L  //extension.journalConfigFor(journalPluginId).getLong("write-alarm-threshold")
+
   /**
    * Common receive handler for processingCommands and persistingEvents
    */
@@ -614,6 +620,7 @@ private[persistence] trait Eventsourced extends Snapshotter with PersistenceStas
       case WriteMessageRejected(p, cause, id) ⇒
         // instanceId mismatch can happen for persistAsync and defer in case of actor restart
         // while message is in flight, in that case the handler has already been discarded
+        log.error(s"FAILED to write batch - rejected, with cause: $cause")
         if (id == instanceId) {
           updateLastSequenceNr(p)
           onWriteMessageComplete(err = false)
@@ -622,6 +629,7 @@ private[persistence] trait Eventsourced extends Snapshotter with PersistenceStas
       case WriteMessageFailure(p, cause, id) ⇒
         // instanceId mismatch can happen for persistAsync and defer in case of actor restart
         // while message is in flight, in that case the handler has already been discarded
+        log.error(s"FAILED to write batch with cause: $cause")
         if (id == instanceId) {
           onWriteMessageComplete(err = false)
           try onPersistFailure(cause, p.payload, p.sequenceNr) finally context.stop(self)
@@ -637,6 +645,8 @@ private[persistence] trait Eventsourced extends Snapshotter with PersistenceStas
         }
       case WriteMessagesSuccessful ⇒
         writeInProgress = false
+        if(startWrite.isDefined && (Instant.now().toEpochMilli - startWrite.get) > writeAlarmThreshold)
+          log.warning(s"FAILED to write batch within the configured amount of milliseconds $writeAlarmThreshold")
         flushJournalBatch()
 
       case WriteMessagesFailed(_) ⇒
