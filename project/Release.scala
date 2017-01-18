@@ -31,8 +31,8 @@ object Release {
     val repo = extracted.get(Publish.defaultPublishTo)
     val state1 = extracted.runAggregated(publishSigned in projectRef, state)
     val (state2, Seq(api, japi)) = extracted.runTask(unidoc in Compile, state1)
-    val (state3, docs) = extracted.runTask(generate in Sphinx, state2)
-    val (state4, _) = extracted.runTask(Dist.dist, state3)
+   // val (state3, docs) = extracted.runTask(generate in Sphinx, state2)
+    val (state4, _) = extracted.runTask(Dist.dist, state2)
     val (state5, activatorDist) = extracted.runTask(ActivatorDist.activatorDist in LocalProject(AkkaBuild.samples.id), state4)
 
     IO.delete(release)
@@ -40,7 +40,7 @@ object Release {
     IO.copyDirectory(repo, release / "releases")
     IO.copyDirectory(api, release / "api" / "akka" / releaseVersion)
     IO.copyDirectory(japi, release / "japi" / "akka" / releaseVersion)
-    IO.copyDirectory(docs, release / "docs" / "akka" / releaseVersion)
+   // IO.copyDirectory(docs, release / "docs" / "akka" / releaseVersion)
 
     // copy all distributions from dist dir to downloads dir
     // may contain distributions from cross-builds

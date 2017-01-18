@@ -11,7 +11,7 @@ import com.typesafe.sbt.site.SphinxSupport.{ generate, Sphinx }
 import sbtunidoc.Plugin._
 
 object Dist {
-  case class DistSources(depJars: Seq[File], libJars: Seq[File], srcJars: Seq[File], docJars: Seq[File], api: File, docs: File)
+  case class DistSources(depJars: Seq[File], libJars: Seq[File], srcJars: Seq[File], docJars: Seq[File], api: File)
 
   val distDirectory = SettingKey[File]("dist-directory")
   val distUnzipped = SettingKey[File]("dist-unzipped")
@@ -32,7 +32,7 @@ object Dist {
     distLibJars <<= (thisProjectRef, buildStructure) flatMap aggregated(packageBin in Compile),
     distSrcJars <<= (thisProjectRef, buildStructure) flatMap aggregated(packageSrc in Compile),
     distDocJars <<= (thisProjectRef, buildStructure) flatMap aggregated(packageDoc in Compile),
-    distSources <<= (distDependencies, distLibJars,  distSrcJars, distDocJars, doc in ScalaUnidoc, generate in Sphinx in docsProject) map DistSources,
+    distSources <<= (distDependencies, distLibJars,  distSrcJars, distDocJars, doc in ScalaUnidoc) map DistSources,
     distDirectory <<= crossTarget / "dist",
     distUnzipped <<= distDirectory / "unzipped",
     distFile <<= (distDirectory, version, scalaBinaryVersion) { (dir, v, sbv) =>
@@ -72,7 +72,7 @@ object Dist {
         IO.delete(unzipped)
         copyDirectory(distBase, base, setExecutable = true)
         copyDirectory(allSources.api, api)
-        copyDirectory(allSources.docs, docs)
+    //    copyDirectory(allSources.docs, docs)
         copyFlat(allSources.docJars, docJars)
         copyFlat(scalaLibs, lib)
         copyFlat(akkaLibs, libAkka)

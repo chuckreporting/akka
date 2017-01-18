@@ -596,9 +596,9 @@ private[persistence] trait Eventsourced extends Snapshotter with PersistenceStas
     try pendingInvocations.peek().handler(payload)
     finally flushBatch()
 
-  var startWrite : Option [Long] = None
+  var startWrite: Option[Long] = None
 
-  var writeAlarmThreshold = 200L  //extension.journalConfigFor(journalPluginId).getLong("write-alarm-threshold")
+  var writeAlarmThreshold = 200L //extension.journalConfigFor(journalPluginId).getLong("write-alarm-threshold")
 
   /**
    * Common receive handler for processingCommands and persistingEvents
@@ -645,7 +645,7 @@ private[persistence] trait Eventsourced extends Snapshotter with PersistenceStas
         }
       case WriteMessagesSuccessful ⇒
         writeInProgress = false
-        if(startWrite.isDefined && (Instant.now().toEpochMilli - startWrite.get) > writeAlarmThreshold)
+        if (startWrite.isDefined && (Instant.now().toEpochMilli - startWrite.get) > writeAlarmThreshold)
           log.warning(s"FAILED to write batch within the configured amount of milliseconds $writeAlarmThreshold")
         flushJournalBatch()
 

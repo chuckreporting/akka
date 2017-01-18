@@ -10,14 +10,14 @@ Formatting.docFormatSettings
 Dependencies.docs
 
 site.settings
-site.sphinxSupport()
+//site.sphinxSupport()
 site.publishSite
 
-SphinxDoc.sphinxPreprocessing
-SphinxDoc.docsSettings
+//SphinxDoc.sphinxPreprocessing
+//SphinxDoc.docsSettings
 
 unmanagedSourceDirectories in ScalariformKeys.format in Test <<= unmanagedSourceDirectories in Test
-additionalTasks in ValidatePR += generate in Sphinx
+//additionalTasks in ValidatePR += generate in Sphinx
 
 enablePlugins(ScaladocNoVerificationOfDiagrams)
 disablePlugins(MimaPlugin)
