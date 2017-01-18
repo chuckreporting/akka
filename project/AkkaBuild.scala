@@ -38,7 +38,7 @@ object AkkaBuild extends Build {
   )
 
   lazy val rootSettings = parentSettings ++ Release.settings ++
-    SphinxDoc.akkaSettings ++ Dist.settings ++ s3Settings ++
+    // SphinxDoc.akkaSettings ++ Dist.settings ++ s3Settings ++
     UnidocRoot.akkaSettings ++
     Protobuf.settings ++ Seq(
       parallelExecution in GlobalScope := System.getProperty("akka.parallelExecution", parallelExecutionByDefault.toString).toBoolean,
