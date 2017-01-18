@@ -646,7 +646,7 @@ private[persistence] trait Eventsourced extends Snapshotter with PersistenceStas
       case WriteMessagesSuccessful ⇒
         writeInProgress = false
         if (startWrite.isDefined && (Instant.now().toEpochMilli - startWrite.get) > writeAlarmThreshold)
-          log.warning(s"FAILED to write batch within the configured amount of milliseconds $writeAlarmThreshold")
+          log.warning(s"FAILED to write batch within the configured amount of milliseconds $writeAlarmThreshold on entitity Id $persistenceId. Processing time: ${Instant.now().toEpochMilli - startWrite.get}. Current size of the batch: ${journalBatch.length}")
         flushJournalBatch()
 
       case WriteMessagesFailed(_) ⇒
