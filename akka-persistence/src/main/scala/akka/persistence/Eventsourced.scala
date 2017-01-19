@@ -180,8 +180,16 @@ private[persistence] trait Eventsourced extends Snapshotter with PersistenceStas
   }
 
   /** INTERNAL API. */
-  override protected[akka] def aroundReceive(receive: Receive, message: Any): Unit =
+  override protected[akka] def aroundReceive(receive: Receive, message: Any): Unit = {
+    if (persistenceId.toLowerCase().contains("worktype")) {
+      message match {
+        case WriteMessagesSuccessful =>
+          log.info("Received WriteMessagesSuccessful")
+        case _ =>
+      }
+    }
     currentState.stateReceive(receive, message)
+  }
 
   /** INTERNAL API. */
   override protected[akka] def aroundPreStart(): Unit = {
@@ -247,6 +255,8 @@ private[persistence] trait Eventsourced extends Snapshotter with PersistenceStas
   }
 
   private def changeState(state: State): Unit = {
+    if(persistenceId.toLowerCase().contains("worktype"))
+      log.info(s"Changing state to: $state")
     currentState = state
   }
 

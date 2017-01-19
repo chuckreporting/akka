@@ -86,6 +86,8 @@ trait AsyncWriteJournal extends Actor with WriteJournalBase with AsyncRecovery {
 
         writeResult.onComplete {
           case Success(results) ⇒
+            if(persistentActor.path.name.contains("worktype"))
+              println(s"[AsyncWriteJournal] - Successfully written async messages. resequence counter: $cctr")
             resequencer ! Desequenced(WriteMessagesSuccessful, cctr, persistentActor, self)
 
             val resultsIter =
@@ -101,6 +103,7 @@ trait AsyncWriteJournal extends Actor with WriteJournalBase with AsyncRecovery {
                       n += 1
                     }
                   case Failure(e) ⇒
+                    println(s"[AsyncWriteJournal] - Failure found on one atomic write while writing to journal. Error: $e")
                     a.payload.foreach { p ⇒
                       resequencer ! Desequenced(WriteMessageRejected(p, e, actorInstanceId), n, persistentActor, p.sender)
                       n += 1
@@ -113,6 +116,7 @@ trait AsyncWriteJournal extends Actor with WriteJournalBase with AsyncRecovery {
             }
 
           case Failure(e) ⇒
+            println(s"[AsyncWriteJournal] - Failure found while writing to journal. Error: $e")
             resequencer ! Desequenced(WriteMessagesFailed(e), cctr, persistentActor, self)
             var n = cctr + 1
             messages.foreach {
