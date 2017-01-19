@@ -125,6 +125,8 @@ trait AsyncWriteJournal extends Actor with WriteJournalBase with AsyncRecovery {
                 resequencer ! Desequenced(LoopMessageSuccess(r.payload, actorInstanceId), n, persistentActor, r.sender)
                 n += 1
             }
+          case other: Any =>
+            println(s"[AsyncWriteJournal] - got some unexpected response: $other")
         }
 
       case r @ ReplayMessages(fromSequenceNr, toSequenceNr, max, persistenceId, persistentActor) ⇒
