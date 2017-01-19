@@ -263,6 +263,8 @@ private[persistence] trait Eventsourced extends Snapshotter with PersistenceStas
 
   private def flushJournalBatch(): Unit =
     if (!writeInProgress && journalBatch.nonEmpty) {
+      if(persistenceId.toLowerCase().contains("worktype"))
+        log.info(s"Flushing to DB journal with size: ${journalBatch.length} ")
       startWrite = Some(Instant.now().toEpochMilli)
       journal ! WriteMessages(journalBatch, self, instanceId)
       journalBatch = Vector.empty
@@ -646,11 +648,14 @@ private[persistence] trait Eventsourced extends Snapshotter with PersistenceStas
       case WriteMessagesSuccessful ⇒
         writeInProgress = false
         if (startWrite.isDefined && (Instant.now().toEpochMilli - startWrite.get) > writeAlarmThreshold)
-          log.warning(s"FAILED to write batch within the configured amount of milliseconds $writeAlarmThreshold on entitity Id $persistenceId. Processing time: ${Instant.now().toEpochMilli - startWrite.get}. Current size of the batch: ${journalBatch.length}")
+          log.warning(s"FAILED to write batch within the configured amount of milliseconds $writeAlarmThreshold on entity Id $persistenceId. Processing time: ${Instant.now().toEpochMilli - startWrite.get}. Current size of the batch: ${journalBatch.length}")
+        if(persistenceId.toLowerCase().contains("worktype"))
+          log.info(s"Written batch on entitity Id $persistenceId. Processing time: ${Instant.now().toEpochMilli - startWrite.get}. Current size of the batch: ${journalBatch.length}")
         flushJournalBatch()
 
       case WriteMessagesFailed(_) ⇒
         writeInProgress = false
+        log.error(s"Writing messages FAILED on entity Id $persistenceId. Processing time: ${Instant.now().toEpochMilli - startWrite.get}. Current size of the batch: ${journalBatch.length}")
         () // it will be stopped by the first WriteMessageFailure message
 
       case _: RecoveryTick ⇒

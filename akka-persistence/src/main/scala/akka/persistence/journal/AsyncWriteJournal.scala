@@ -69,8 +69,12 @@ trait AsyncWriteJournal extends Actor with WriteJournalBase with AsyncRecovery {
           case Success(prep) ⇒
             // try in case the asyncWriteMessages throws
             try breaker.withCircuitBreaker(asyncWriteMessages(prep))
-            catch { case NonFatal(e) ⇒ Future.failed(e) }
+            catch { case NonFatal(e) ⇒ {
+              println(s"[AsyncWriteJournal] - Failed to write async messages. Error: $e")
+              Future.failed(e)}
+            }
           case f @ Failure(_) ⇒
+            println(s"[AsyncWriteJournal] - Failed to prepare persistent batch. Error: $f")
             // exception from preparePersistentBatch => rejected
             Future.successful(messages.collect { case a: AtomicWrite ⇒ f })
         }).map { results ⇒
