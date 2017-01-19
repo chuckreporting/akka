@@ -5,6 +5,8 @@
 
 package akka.persistence.journal
 
+import akka.persistence.JournalProtocol.WriteMessagesSuccessful
+
 import scala.concurrent.duration._
 import akka.actor._
 import akka.pattern.pipe
@@ -287,11 +289,25 @@ private[persistence] object AsyncWriteJournal {
 
     @scala.annotation.tailrec
     private def resequence(d: Desequenced) {
+
+      val isworktypeSuccess = d.msg match {
+        case WriteMessagesSuccessful =>
+          if (d.target.path.name.contains("worktype"))
+            true
+          else
+            false
+        case _ => false
+      }
+
       if (d.snr == delivered + 1) {
         delivered = d.snr
+        if(isworktypeSuccess)
+          println(s"Sending the WriteMessagesSuccessful to worktype. delivered: $delivered. snr: ${d.snr}")
         d.target.tell(d.msg, d.sender)
       } else {
         delayed += (d.snr → d)
+        if(isworktypeSuccess)
+          println(s"!!! the WriteMessagesSuccessful to worktype has a jump in sequence and getting delayed. delivered: $delivered. snr: ${d.snr}")
       }
       val ro = delayed.remove(delivered + 1)
       if (ro.isDefined) resequence(ro.get)
